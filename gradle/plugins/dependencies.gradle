@@ -9,19 +9,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-actuator'
 
     // Biblioteca de código comum
-    implementation 'br.com.valdircezar:hd-commons-lib:1.0.0'
+    implementation 'br.com.daniel.userservicelib:commons-lib:1.0.0'
 
     // Starter para desenvolvimento de aplicativos web com Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Starter para configuração do Spring Cloud Config
-    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // Starter para configuração do Spring Cloud
-    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
 
     // Starter para integração com o Eureka Discovery Client
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     // Starter para acesso a dados com o MongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
