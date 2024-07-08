@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: 'user-service-api'
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/helpdesk?authSource=admin
+      auto-index-creation: true
