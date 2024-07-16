@@ -3,5 +3,10 @@ spring:
     name: 'user-service-api'
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/helpdesk?authSource=admin
+      uri: 'mongodb://root:root@localhost:27017/helpdesk?authSource=admin'
       auto-index-creation: true
+springdoc:
+  openapi:
+    title: 'User Service API'
+    description: 'Component responsible for user management created on backend'
+    version: '1.0.0'
