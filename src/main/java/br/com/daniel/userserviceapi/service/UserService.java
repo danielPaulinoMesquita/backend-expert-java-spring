@@ -6,6 +6,7 @@ import br.com.userservice.commonslib.model.exceptions.ResourceNotFoundException;
 import br.com.userservice.commonslib.model.requests.CreateUserRequest;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +24,16 @@ public class UserService {
     }
 
     public void save(CreateUserRequest createUserRequest) {
-        userRepository.save(userMapper.fromRequest(createUserRequest));
+        verifyIfEmailAlreadyExists(createUserRequest.email(), null);
+        userRepository
+                .save(userMapper.fromRequest(createUserRequest));
+    }
+
+    private void verifyIfEmailAlreadyExists(final String email, final String id) {
+        userRepository.findByEmail(email)
+                .filter(user -> !user.getId().equals(id))
+                .ifPresent(user -> {
+                    throw new DataIntegrityViolationException("Email ["+email+"] already exists.");
+                });
     }
 }

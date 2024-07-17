@@ -4,7 +4,7 @@ import br.com.userservice.commonslib.model.exceptions.ResourceNotFoundException;
 import br.com.userservice.commonslib.model.exceptions.StandardError;
 import br.com.userservice.commonslib.model.exceptions.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,16 +14,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<StandardError> handlerNotFoundException(final ResourceNotFoundException ex, final HttpServletRequest request){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+        return ResponseEntity.status(NOT_FOUND).body(
                 StandardError.builder()
                         .timestamp(LocalDateTime.now())
-                        .status(HttpStatus.NOT_FOUND.value())
-                        .error(HttpStatus.NOT_FOUND.getReasonPhrase())
+                        .status(NOT_FOUND.value())
+                        .error(NOT_FOUND.getReasonPhrase())
                         .message(ex.getMessage())
                         .path(request.getRequestURI())
                         .build()
@@ -34,7 +37,7 @@ public class ControllerExceptionHandler {
     ResponseEntity<StandardError> handlerNotFoundException(final MethodArgumentNotValidException ex, final HttpServletRequest request){
         var error = ValidationException.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(BAD_REQUEST.value())
                 .error("Validation Exception")
                 .message("Exception in validation attributes")
                 .path(request.getRequestURI())
@@ -46,5 +49,20 @@ public class ControllerExceptionHandler {
         }
 
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<StandardError> handlerNotFoundException(
+            final DataIntegrityViolationException ex, final HttpServletRequest request
+    ){
+        return ResponseEntity.badRequest().body(
+                StandardError.builder()
+                        .timestamp(LocalDateTime.now())
+                        .status(BAD_REQUEST.value())
+                        .error(BAD_REQUEST.getReasonPhrase())
+                        .message(ex.getMessage())
+                        .path(request.getRequestURI())
+                        .build()
+        );
     }
 }
