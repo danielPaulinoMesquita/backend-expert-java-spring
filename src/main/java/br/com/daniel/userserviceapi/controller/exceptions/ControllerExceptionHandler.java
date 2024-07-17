@@ -2,13 +2,17 @@ package br.com.daniel.userserviceapi.controller.exceptions;
 
 import br.com.userservice.commonslib.model.exceptions.ResourceNotFoundException;
 import br.com.userservice.commonslib.model.exceptions.StandardError;
+import br.com.userservice.commonslib.model.exceptions.ValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
@@ -24,5 +28,23 @@ public class ControllerExceptionHandler {
                         .path(request.getRequestURI())
                         .build()
         );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<StandardError> handlerNotFoundException(final MethodArgumentNotValidException ex, final HttpServletRequest request){
+        var error = ValidationException.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Validation Exception")
+                .message("Exception in validation attributes")
+                .path(request.getRequestURI())
+                .errors(new ArrayList<>())
+                .build();
+
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            error.addError(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        return ResponseEntity.badRequest().body(error);
     }
 }
