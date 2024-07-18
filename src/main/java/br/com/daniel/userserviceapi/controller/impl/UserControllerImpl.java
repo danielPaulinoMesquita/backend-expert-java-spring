@@ -3,6 +3,7 @@ package br.com.daniel.userserviceapi.controller.impl;
 import br.com.daniel.userserviceapi.controller.UserController;
 import br.com.daniel.userserviceapi.service.UserService;
 import br.com.userservice.commonslib.model.requests.CreateUserRequest;
+import br.com.userservice.commonslib.model.requests.UpdateUserRequest;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +33,10 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<List<UserResponse>> findAll() {
         return ResponseEntity.ok().body(userService.findAll());
+    }
+
+    @Override
+    public ResponseEntity<UserResponse> update(final String id, final UpdateUserRequest updateUserRequest) {
+        return ResponseEntity.ok().body(userService.update(id, updateUserRequest));
     }
 }

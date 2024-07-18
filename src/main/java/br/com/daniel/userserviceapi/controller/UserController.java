@@ -2,6 +2,7 @@ package br.com.daniel.userserviceapi.controller;
 
 import br.com.userservice.commonslib.model.exceptions.StandardError;
 import br.com.userservice.commonslib.model.requests.CreateUserRequest;
+import br.com.userservice.commonslib.model.requests.UpdateUserRequest;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,6 +68,29 @@ public interface UserController {
     })
     @GetMapping
     ResponseEntity<List<UserResponse>> findAll();
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UserResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class))),
+    })
+    ResponseEntity<UserResponse> update(
+            @Parameter(description = "User id", required = true, example = "6137f7d4b0b1c65d18a3a5a2")
+            @PathVariable(name = "id") final String id,
+            @Valid @RequestBody final UpdateUserRequest updateUserRequest
+    );
 
 
 }
