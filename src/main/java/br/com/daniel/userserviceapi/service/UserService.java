@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -20,7 +23,7 @@ public class UserService {
         return  userMapper.fromEntity(
                 userRepository
                         .findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Object not Found. id" + id + ", Type: "+UserResponse.class.getSimpleName())));
+                        .orElseThrow(() -> new ResourceNotFoundException("Object not Found. id" + id + ", Type: " +UserResponse.class.getSimpleName())));
     }
 
     public void save(CreateUserRequest createUserRequest) {
@@ -35,5 +38,11 @@ public class UserService {
                 .ifPresent(user -> {
                     throw new DataIntegrityViolationException("Email ["+email+"] already exists.");
                 });
+    }
+
+    public List<UserResponse> findAll() {
+        return userRepository.findAll().stream()
+                .map(userMapper::fromEntity)
+                .toList();
     }
 }

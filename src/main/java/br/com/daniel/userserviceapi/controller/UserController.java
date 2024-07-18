@@ -5,6 +5,7 @@ import br.com.userservice.commonslib.model.requests.CreateUserRequest;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -24,9 +27,11 @@ public interface UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User found"),
             @ApiResponse(responseCode = "404", description = "user not found",
-                         content = @Content( mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class))),
+                         content = @Content( mediaType = APPLICATION_JSON_VALUE,
+                         schema = @Schema(implementation = StandardError.class))),
             @ApiResponse(responseCode = "500", description = "Internal server Error",
-                         content = @Content( mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class)))
+                         content = @Content( mediaType = APPLICATION_JSON_VALUE,
+                         schema = @Schema(implementation = StandardError.class)))
     })
     @GetMapping("/{id}")
     ResponseEntity<UserResponse> findById(
@@ -38,12 +43,29 @@ public interface UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User created"),
             @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content( mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class))),
+                    content = @Content( mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class))),
             @ApiResponse(responseCode = "500", description = "Internal server Error",
-                    content = @Content( mediaType =  APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class)))
+                    content = @Content( mediaType =  APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class)))
     })
     @PostMapping
     ResponseEntity<Void> save(
             @Valid @RequestBody final CreateUserRequest createUserRequest
     );
+
+    @Operation(summary = "Find all users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users found",
+                    content = @Content(mediaType = APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(
+                    schema = @Schema(implementation = UserResponse.class)))),
+            @ApiResponse(responseCode = "500", description = "Internal server Error",
+                    content = @Content( mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class)))
+    })
+    @GetMapping
+    ResponseEntity<List<UserResponse>> findAll();
+
+
 }
