@@ -9,6 +9,7 @@ import br.com.userservice.commonslib.model.requests.UpdateUserRequest;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder encoder;
 
     public UserResponse findById(String id) {
         return  userMapper.fromEntity(find(id));
@@ -27,7 +29,17 @@ public class UserService {
     public void save(CreateUserRequest createUserRequest) {
         verifyIfEmailAlreadyExists(createUserRequest.email(), null);
         userRepository
-                .save(userMapper.fromRequest(createUserRequest));
+                .save(userMapper.fromRequest(createUserRequest)
+                        .withPassword(encoder.encode(createUserRequest.password())));
+    }
+
+    public UserResponse update(String id, UpdateUserRequest updateUserRequest) {
+        User user = find(id);
+        verifyIfEmailAlreadyExists(updateUserRequest.email(), id);
+        return userMapper.fromEntity(userRepository.save(
+                userMapper.update(updateUserRequest, user).withPassword(updateUserRequest.password() != null ?
+                        encoder.encode(updateUserRequest.password()) : user.getPassword())
+        ));
     }
 
     private void verifyIfEmailAlreadyExists(final String email, final String id) {
@@ -42,12 +54,6 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(userMapper::fromEntity)
                 .toList();
-    }
-
-    public UserResponse update(String id, UpdateUserRequest updateUserRequest) {
-        User user = find(id);
-        verifyIfEmailAlreadyExists(updateUserRequest.email(), id);
-        return userMapper.fromEntity(userRepository.save(userMapper.update(updateUserRequest, user)));
     }
 
     private User find(String id) {
