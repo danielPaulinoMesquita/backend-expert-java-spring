@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,6 +62,21 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).findById(anyString());
         verify(userMapper, times(0)).fromEntity(any(User.class));
+    }
+
+    @Test
+    void whenCallFindAllWithValidIdThenReturnListOfUserResponse() {
+        when(userRepository.findAll()).thenReturn(List.of(new User(), new User()));
+        when(userMapper.fromEntity(any(User.class))).thenReturn(mock(UserResponse.class));
+
+        final List<UserResponse> userResponses = userService.findAll();
+
+        assertNotNull(userResponses);
+        assertEquals(2, userResponses.size());
+        assertEquals(UserResponse.class, userResponses.get(0).getClass());
+
+        verify(userRepository, times(1)).findAll();
+        verify(userMapper, times(2)).fromEntity(any(User.class));
     }
 
 }
