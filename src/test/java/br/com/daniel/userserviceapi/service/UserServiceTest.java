@@ -3,6 +3,7 @@ package br.com.daniel.userserviceapi.service;
 import br.com.daniel.userserviceapi.entity.User;
 import br.com.daniel.userserviceapi.mapper.UserMapper;
 import br.com.daniel.userserviceapi.repository.UserRepository;
+import br.com.userservice.commonslib.model.exceptions.ResourceNotFoundException;
 import br.com.userservice.commonslib.model.responses.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,8 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -45,6 +45,22 @@ class UserServiceTest {
 
         verify(userRepository, times(1)).findById(anyString());
         verify(userMapper, times(1)).fromEntity(any(User.class));
+    }
+
+    @Test
+    void whenCallFindByIdWithInvalidIdThenReturnNotFoundException() {
+        String identify = "1";
+        when(userRepository.findById(identify)).thenReturn(Optional.empty());
+
+        try {
+            userService.findById(identify);
+        } catch (Exception e) {
+            assertEquals(ResourceNotFoundException.class, e.getClass());
+            assertEquals("Object not Found. id" + identify + ", Type: " +UserResponse.class.getSimpleName(), e.getMessage());
+        }
+
+        verify(userRepository, times(1)).findById(anyString());
+        verify(userMapper, times(0)).fromEntity(any(User.class));
     }
 
 }
