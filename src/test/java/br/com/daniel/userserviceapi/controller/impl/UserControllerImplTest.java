@@ -2,10 +2,13 @@ package br.com.daniel.userserviceapi.controller.impl;
 
 import br.com.daniel.userserviceapi.entity.User;
 import br.com.daniel.userserviceapi.repository.UserRepository;
+import br.com.userservice.commonslib.model.requests.CreateUserRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -14,6 +17,7 @@ import java.util.List;
 import static br.com.daniel.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,5 +85,25 @@ class UserControllerImplTest {
 
         userRepository.deleteAll(List.of(entity, entity2));
 
+    }
+
+    @Test
+    void testSaveWithSuccess() throws Exception {
+        final var validEmail = "testeJunit@gmail.com";
+        final var request = generateMock(CreateUserRequest.class).withEmail(validEmail);
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON).content(toJson(request))
+        ).andExpect(status().isCreated());
+
+        userRepository.deleteByEmail(validEmail);
+    }
+
+    private String toJson(final Object object) {
+        try {
+            return new ObjectMapper().writeValueAsString(object);
+        } catch (final Exception e){
+            throw new RuntimeException(e);
+        }
     }
 }
