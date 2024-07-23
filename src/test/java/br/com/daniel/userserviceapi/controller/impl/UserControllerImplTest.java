@@ -2,8 +2,6 @@ package br.com.daniel.userserviceapi.controller.impl;
 
 import br.com.daniel.userserviceapi.entity.User;
 import br.com.daniel.userserviceapi.repository.UserRepository;
-import br.com.userservice.commonslib.model.enums.ProfileEnum;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,9 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Set;
-
 import static br.com.daniel.userserviceapi.creator.CreatorUtils.generateMock;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,7 +25,6 @@ class UserControllerImplTest {
 
     @Autowired
     private UserRepository userRepository;
-
 
     @Test
     void testFindByIdWithSuccess() throws Exception {
@@ -46,5 +42,20 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.profiles").isArray());
 
         userRepository.deleteById(userId);
+    }
+
+    @Test
+    void testFindByIdWithNotFound() throws Exception {
+        var userId = 1L;
+
+        mockMvc.perform(get("/api/users/{id}", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value("Object not Found. id" + userId + ", Type: UserResponse"))
+                .andExpect(jsonPath("$.error").value(NOT_FOUND.getReasonPhrase()))
+                .andExpect(jsonPath("$.path").value("/api/users/" + userId))
+                .andExpect(jsonPath("$.status").value(NOT_FOUND.value()))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
     }
 }
