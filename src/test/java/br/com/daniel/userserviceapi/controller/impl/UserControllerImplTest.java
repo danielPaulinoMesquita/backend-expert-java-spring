@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static br.com.daniel.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +58,28 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.path").value("/api/users/" + userId))
                 .andExpect(jsonPath("$.status").value(NOT_FOUND.value()))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+    }
+
+    @Test
+    void testFindAllWithSuccess() throws Exception {
+        var entity = generateMock(User.class);
+        entity.setId(null);
+
+        var entity2 = generateMock(User.class);
+        entity2.setId(null);
+
+        userRepository.saveAll(List.of(entity, entity2));
+
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0]").isNotEmpty())
+                .andExpect(jsonPath("$[1]").isNotEmpty())
+                .andExpect(jsonPath("$[0].profiles").isArray())
+                .andExpect(jsonPath("$[1].profiles").isArray());
+
+        userRepository.deleteAll(List.of(entity, entity2));
 
     }
 }
