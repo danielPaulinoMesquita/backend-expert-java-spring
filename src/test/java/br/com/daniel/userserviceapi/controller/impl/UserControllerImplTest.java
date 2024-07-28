@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static br.com.daniel.userserviceapi.creator.CreatorUtils.generateMock;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class UserControllerImplTest {
+
+    public static final String BASE_URI = "/api/users";
 
     @Autowired
     private MockMvc mockMvc;
@@ -75,7 +78,7 @@ class UserControllerImplTest {
 
         userRepository.saveAll(List.of(entity, entity2));
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get(BASE_URI))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0]").isNotEmpty())
@@ -92,9 +95,31 @@ class UserControllerImplTest {
         final var validEmail = "testeJunit@gmail.com";
         final var request = generateMock(CreateUserRequest.class).withEmail(validEmail);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post(BASE_URI)
                 .contentType(MediaType.APPLICATION_JSON).content(toJson(request))
         ).andExpect(status().isCreated());
+
+        userRepository.deleteByEmail(validEmail);
+    }
+
+    @Test
+    void testSaveWithConflict() throws Exception {
+        final var validEmail = "testeJunit@gmail.com";
+        final var entity = generateMock(User.class).withId(null).withEmail(validEmail);
+
+        userRepository.save(entity);
+
+        final var request = generateMock(CreateUserRequest.class).withEmail(validEmail);
+
+        mockMvc.perform(post(BASE_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(request))
+                ).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Email ["+validEmail+"] already exists."))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.path").value(BASE_URI))
+                .andExpect(jsonPath("$.status").value(CONFLICT.value()));
+
 
         userRepository.deleteByEmail(validEmail);
     }
