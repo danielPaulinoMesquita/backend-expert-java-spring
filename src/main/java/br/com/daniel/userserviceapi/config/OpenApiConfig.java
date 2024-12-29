@@ -10,12 +10,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    @Value("${springdoc.openapi.title}")
+    private String title;
+
+    @Value("${springdoc.openapi.description}")
+    private String description;
+
+    @Value("${springdoc.openapi.version}")
+    private String version;
+
     @Bean
-    public OpenAPI customerOpenAPI(
-            @Value("${springdoc.openapi.title}") final String title,
-            @Value("${springdoc.openapi.description}") final String description,
-            @Value("${springdoc.openapi.version}") final String version
-    ) {
-        return new OpenAPI().info(new Info().title(title).description(description).version(version));
+    public OpenAPI customerOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title(title)
+                        .description(description)
+                        .version(version));
     }
 }
